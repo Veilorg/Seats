@@ -189,6 +189,18 @@ class BrowserIcons @Suppress("LongParameterList") constructor(
                 Logger.error("Could not install browser-icons extension", throwable)
             },
         )
+        engine.installWebExtension(
+            id = "veil@veil.at",
+            url = "resource://android/assets/extensions/veil/",
+            onSuccess = { extension ->
+                Logger.debug("Installed browser-icons extension")
+
+                store.flowScoped { flow -> subscribeToUpdates(store, flow, extension) }
+            },
+            onError = { _, throwable ->
+                Logger.error("Could not install browser-icons extension", throwable)
+            },
+        )
     }
 
     /**

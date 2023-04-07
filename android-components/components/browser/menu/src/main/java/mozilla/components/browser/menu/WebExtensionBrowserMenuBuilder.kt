@@ -90,6 +90,7 @@ class WebExtensionBrowserMenuBuilder(
         items: MutableList<BrowserMenuItem>,
         filteredExtensionMenuItems: List<WebExtensionBrowserMenuItem>,
     ): List<BrowserMenuItem> {
+        // create addon
         val addonsMenuItem = if (filteredExtensionMenuItems.isNotEmpty()) {
             val backPressMenuItem = BackPressMenuItem(
                 label = context.getString(R.string.mozac_browser_menu_addons),

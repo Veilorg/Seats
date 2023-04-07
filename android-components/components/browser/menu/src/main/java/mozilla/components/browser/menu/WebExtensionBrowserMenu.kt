@@ -67,7 +67,7 @@ class WebExtensionBrowserMenu internal constructor(
         internal val webExtensionBrowserActions = HashMap<String, WebExtensionBrowserMenuItem>()
         internal val webExtensionPageActions = HashMap<String, WebExtensionBrowserMenuItem>()
 
-        internal fun getOrUpdateWebExtensionMenuItems(
+        fun getOrUpdateWebExtensionMenuItems(
             state: BrowserState,
             tab: SessionState? = null,
         ): List<WebExtensionBrowserMenuItem> {

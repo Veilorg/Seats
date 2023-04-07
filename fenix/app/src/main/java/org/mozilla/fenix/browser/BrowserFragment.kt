@@ -18,8 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mozilla.components.browser.menu.WebExtensionBrowserMenu
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.findTab
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.store.BrowserStore
@@ -28,10 +30,12 @@ import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.feature.app.links.AppLinksUseCases
 import mozilla.components.feature.contextmenu.ContextMenuCandidate
+import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.feature.readerview.ReaderViewFeature
 import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.lib.state.ext.consumeFlow
+import mozilla.components.lib.state.ext.consumeFrom
 import mozilla.components.service.glean.private.NoExtras
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
@@ -101,6 +105,88 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
         )
 
         browserToolbarView.view.addNavigationAction(homeAction)
+
+        // nav menu
+        val extensionMenuItems =
+            WebExtensionBrowserMenu.getOrUpdateWebExtensionMenuItems(state = components.core.store.state, tab = components.core.store.state.selectedTab)
+
+        System.out.println(extensionMenuItems)
+
+        session?.let {
+            promptsFeature.set(
+                feature = PromptFeature(
+                    fragment = this,
+                    store = requireComponents.core.store,
+                    customTabId = it.id,
+                    fragmentManager = parentFragmentManager,
+                    onNeedToRequestPermissions = {  },
+                ),
+                owner = this,
+                view = view,
+            )
+        }
+
+        val veilAction = BrowserToolbar.Button(
+            imageDrawable = AppCompatResources.getDrawable(
+                context,
+                mozilla.components.ui.icons.R.drawable.ic_veil,
+            )!!,
+            contentDescription = context.getString(R.string.browser_toolbar_home),
+            iconTintColorResource = ViewGroup.NO_ID,
+            listener = {
+                if (extensionMenuItems.size == 0) return@Button;
+
+                val veilExtension = extensionMenuItems[0]
+
+                coreComponents.store.state.extensions[veilExtension.id]?.popupSession?.let {
+                    val engineSession = it;
+                    initializeSession(engineSession)
+                }
+
+                consumeFrom(coreComponents.store) { state ->
+                    state.extensions[veilExtension.id]?.let { extState ->
+                        val popupSession = extState.popupSession
+                        if (popupSession != null) {
+                            initializeSession(popupSession)
+                            binding.viewBrowserWindow.veilEngineBrowser.render(popupSession)
+                            engineSession = popupSession
+                        }
+                    }
+                }
+
+//                val action = veilExtension.action;
+//                action.onClick()
+//                val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
+//                    webExtensionId = veilExtension.id,
+//                    webExtensionTitle = veilExtension.action.title,
+//                )
+//                val manager = parentFragmentManager
+//                val fragment2 = AddonInternalSettingsFragment()
+//                val args = Bundle()
+//                args.putParcelable(
+//                    "addon",
+//                    Addon(
+//                        id = veilExtension.id,
+//                        updatedAt = "1970-01-01T00:00:00Z",
+//                    ),
+//                )
+//                fragment2.setArguments(args)
+//                parentFragmentManager.beginTransaction().replace(R.id.browserFragment, fragment2).commit()
+//                val transaction: FragmentTransaction = manager.beginTransaction()
+//                transaction.add(R.id.container, fragment2)
+//                transaction.addToBackStack(null)
+//                transaction.commit()
+
+//                findNavController().navigate(action)
+//                val intent = Intent(context, WebExtensionPopupFeature::class.java)
+//                intent.putExtra("web_extension_id", veilExtension.id)
+//                intent.putExtra("web_extension_name", veilExtension.action.title)
+//                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                startActivity(intent)
+            },
+        )
+        browserToolbarView.view.addNavigationAction(veilAction)
+
 
         updateToolbarActions(isTablet = resources.getBoolean(R.bool.tablet))
 

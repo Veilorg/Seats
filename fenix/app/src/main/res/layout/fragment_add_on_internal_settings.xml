@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--    BROWSEr-->
     <mozilla.components.concept.engine.EngineView
         tools:ignore="Instantiatable"
         android:id="@+id/addonSettingsEngineView"

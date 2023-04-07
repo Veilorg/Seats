@@ -360,6 +360,7 @@ open class DefaultToolbarMenu(
 
     @VisibleForTesting(otherwise = PRIVATE)
     val coreMenuItems by lazy {
+        // created menu
         val menuItems =
             listOfNotNull(
                 if (shouldUseBottomToolbar) null else menuToolbar,

@@ -415,6 +415,7 @@ abstract class BaseBrowserFragment :
             browserToolbarMenuController,
         )
 
+        // Tool bar
         _browserToolbarView = BrowserToolbarView(
             context = context,
             container = binding.browserLayout,

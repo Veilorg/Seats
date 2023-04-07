@@ -36,9 +36,9 @@ import mozilla.components.ui.icons.R as iconsR
  * depending on the menu position).
  */
 class WebExtensionBrowserMenuItem(
-    internal var action: Action,
+    var action: Action,
     internal val listener: () -> Unit,
-    internal val id: String = "",
+    val id: String = "",
     override val isCollapsingMenuLimit: Boolean = false,
     override val isSticky: Boolean = false,
 ) : BrowserMenuItem {

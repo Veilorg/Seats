@@ -1107,6 +1107,7 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     }
 
     private fun openPopup(webExtensionState: WebExtensionState) {
+        // opens popup
         val action = NavGraphDirections.actionGlobalWebExtensionActionPopupFragment(
             webExtensionId = webExtensionState.id,
             webExtensionTitle = webExtensionState.name,
